@@ -18,8 +18,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fileName = ""
         self.resultHashTable = {
             "Normal_Abnormal": ["Abnormal", "Normal"],
-            "Normal_VSD": ["Normal", "VSD"],
-            "Normal_ASD": ["Normal", "ASD"],
+            "Normal_VSD": ["VSD", "Normal"],
+            "Normal_ASD": ["ASD", "Normal"],
             "VSD_ASD": ["VSD", "ASD"]
         }
         
@@ -36,8 +36,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def Analysis(self):
         self.model = self.ui.ModelSelector.currentText().split(" / ")
         selectModel = self.model[0] + "_" + self.model[1]
-        heartSoundResult = subprocess.check_output(["python3", "models/ModelPredict.py", self.pathFile, self.fileName.strip(".wav"), selectModel])
-        subprocess.check_output(["python3", "models/S2_Segmentation_ok.py", self.pathFile, self.fileName.strip(".wav")])
+        if (selectModel == 'Normal_Abnormal'):
+            heartSoundResult = subprocess.check_output(["python3", "models/ModelPredict.py", self.pathFile, self.fileName.strip(".wav"), selectModel])
+        elif (selectModel == 'Normal_VSD'):
+            heartSoundResult = subprocess.check_output(["python3", "models/model_predict_VSD.py", self.pathFile, self.fileName.strip(".wav"), selectModel])
+        elif (selectModel == 'Normal_ASD'):
+            heartSoundResult = subprocess.check_output(["python3", "models/model_predict_ASD.py", self.pathFile, self.fileName.strip(".wav"), selectModel])
+        subprocess.check_output(["python3", "models/Segmentation_plt.py", self.pathFile, self.fileName.strip(".wav")])
         result = int(heartSoundResult.decode('utf-8'))
         resultText = self.resultHashTable[selectModel][result]
         if (resultText == 'Normal'):
